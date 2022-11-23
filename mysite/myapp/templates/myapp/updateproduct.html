@@ -9,24 +9,25 @@
 
     <div class="mb-4">
         <label class="block text-gray-700 text-sm font-bold mb-2" for="">Product Name</label>
-        <input class="shadow appearance-none border rounded py-2 px-3 mr-10 text-gray-700"  placeholder="Name of Product" type="text" name="name" id="name">
+        <input class="shadow appearance-none border rounded py-2 px-3 mr-10 text-gray-700"  placeholder="Name of Product" value="{{product.name}}" type="text" name="name" id="name">
 
     </div>
     <div class="mb-4">
         <label class="block text-gray-700 text-sm font-bold mb-2" for="">Product Price</label>
-        <input class="shadow appearance-none border rounded py-2 px-3 mr-10 text-gray-700" placeholder="Price of Product" type="text" name="price" id="price">
+        <input class="shadow appearance-none border rounded py-2 px-3 mr-10 text-gray-700" placeholder="Price of Product"  value="{{product.price}}" type="text" name="price" id="price">
     </div>
     <div class="mb-4">
         <label class="block text-gray-700 text-sm font-bold mb-2" for="">Product Description</label>
-        <input class="shadow appearance-none border rounded py-2 px-3 mr-10 text-gray-700" placeholder="Product Description" type="text" name="desc" id="desc">
+        <input class="shadow appearance-none border rounded py-2 px-3 mr-10 text-gray-700" placeholder="Product Description"  value="{{product.desc}}" type="text" name="desc" id="desc">
     </div>
     <div class="mb-4">
+        <img class="w-20 h-20" src="{{product.image.url}}" alt=""  >
         <label class="block text-gray-700 text-sm font-bold mb-2" for="">Product Image</label>
         <input class="s py-2" type="file" accept="image/*" name="upload" id="upload">
     </div>
     <div class="mb-4">
         <!--<label></label>-->
-        <input class="bg-yellow-500 text-white px-5 py-2" type="submit" name="Add Product" value="Add Product" id="">
+        <input class="bg-yellow-500 text-white px-5 py-2" type="submit" name="Add Product" value="Update Product" id="">
     </div>
 
     <div>
