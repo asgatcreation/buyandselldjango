@@ -1,0 +1,19 @@
+{% extends 'myapp/base.html'  %}
+{% load static %}
+{% block content %}
+
+    <form class="bg-white shadow-md m-10 w-3/5 rounded px-8 pt-6 pb-8 mb-4 " method="post" enctype="multipart/form-data" >
+        {% csrf_token %}
+        <div class="mb-4">
+            <label for="">Upload Profile Image</label>
+            <input class="py-2" placeholder="upload a clear profile image" type="file" accept="image/*"  name="upload" id="upload">
+        </div>
+        <div class="mb-4">
+            <label for="">Contact Number</label>
+            <input class="shadow appearance-none border rounded py-2 px-3 mr-10 text-yellow-700 " placeholder="08100000000" type="text"  value= "contact_number"  name="contact_number" id="contact_number">
+        </div>
+        <input class="bg-yellow-500 text-white px-5 py-2" name="Add" value="Add" type="submit">
+    </form>
+
+
+{% endblock %}

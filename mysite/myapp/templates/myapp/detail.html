@@ -14,7 +14,11 @@
         <div class="mt-5">{{product.name}}</div>
         <div class="mt-5 text-yellow-500">₦ {{product.price}}</div>
         <div class="mt-5 text-gray-700">{{product.desc}}</div>
+        <div class="mt-5 text-gray-700">  Posted by: 
+            <a href="{% url 'users:sellerprofile' product.seller_name.id  %}">{{product.seller_name}}</a>
+           </div>
     </div>
+    <div class="mt-5 text-gray-700">{{product.seller.profile.conctact_number}}</div>
 
 </div> 
 {% comment %} <h1></h1>
