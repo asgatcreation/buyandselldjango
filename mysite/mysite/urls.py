@@ -18,6 +18,14 @@ from django.urls import path,include
 from django.conf import settings
 from django.conf.urls.static import static
 
+from os import name
+#from django.contrib import admin
+#from django.urls import path
+#from django.conf import settings
+#from django.conf.urls.static import static
+from myapp.views import payment_response, product_detail, products
+
+
 
 #from myapp import views
 
@@ -27,9 +35,18 @@ urlpatterns = [
     path('myapp/',include('myapp.urls')),
     
     path('users/',include('users.urls')),
+    
+    path('',include('paystackpay.urls')),
+    
+    path('', products, name='products'),
+    path('products/<int:id>/details', product_detail, name='details'),
+    path('callback', payment_response, name='payment_response')
+    
+    # path("paystack", include(('paystack.urls', 'paystack'),namespace='paystack'))
 
     
     
 ]
 
-urlpatterns+=static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
+if settings.DEBUG:
+    urlpatterns+=static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

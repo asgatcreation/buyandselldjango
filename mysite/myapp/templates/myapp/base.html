@@ -19,11 +19,13 @@
     
                             {% comment %} <a href="#" class="py-4 px-2 text-gray-500 font-semibold border-b-4 border-green-500">Products</a> {% endcomment %}
      
-                            <a href="{%url 'myapp:add_product'%}" class="py-4 px-2 text-gray-500 font-semibold">Post Ad</a>
+                            <!--<a href="{%url 'myapp:add_product'%}" class="py-4 px-2 text-gray-500 font-semibold">Post Ad</a>-->
                             <a href="{% url 'myapp:products' %}" class="py-4 px-2 text-gray-500 font-semibold">View products</a>
                             {% if user.is_authenticated %}
+                                <a href="{%url 'myapp:add_product'%}" class="py-4 px-2 text-gray-500 font-semibold">Post Ad</a>
                                 <a class="py-4 px-20 text-gray-500 font-semibold" href="{% url 'users:logout' %}">Logout</a>
                                 <a class="py-4 px-40 text-gray-500 font-semibold" href="{% url 'users:profile' %}">{{user.username}}</a>
+                                <a class="py-4 text-gray-500 font-semibold" href="{% url 'myapp:mylistings' %}">My listings</a>
                             {% else %}
                             <a class="py-4 px-40 text-gray-500 font-semibold" href="{% url 'users:login' %}">Login</a>
                             {% endif %}

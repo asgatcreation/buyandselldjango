@@ -19,6 +19,13 @@
     <div class="flex mt-5 p-10 justify-center">
         <h2 class="text-3xl font-normal mt-0 mb-2 text-gray-500">Recent Products</h2>
     </div>
+    <div class="mt-5 p-10 justify-center">
+        <h2>Search Products🔎</h2>
+        <form method="GET">
+            <input class="font-bold text-lg text-gray-700" name = "product_name" id = "product_name" placeholder="type a product to search" type="text">
+        </form>
+
+    </div>
 
 
 
@@ -27,7 +34,8 @@
         <!--first card-->
  
         {% comment %} {{products}} {% endcomment %}
-        {% for product in products  %}
+        {% for product in page_obj  %}
+        
         {% comment %} <a href="/myapp/products/{{product.id}}"> {% endcomment %}
         <a href="{% url 'myapp:product_detail' product.id %}">
         <div class="rounded overflow-hidden shadow-lg">
@@ -45,9 +53,29 @@
         </div>    
         </a>
         {% endfor %}
+    </div>
+    <!--Pagination codes start here-->
 
+    <div class="pagination flex justify-center items-center mb-20">
+        <span>
+            {% if page_obj.has_previous  %}
+            <a class="text-sm font-medium border py-2 px-4 items-center inline-flex relative text-yellow-500 border-yellow-500 z-10  " href="?page=1">First</a>
+            <a class="text-sm font-medium border py-2 px-4 items-center inline-flex relative text-yellow-500 border-yellow-500 z-10  " href="?page={{page_obj.previous_page_number}}">Previous</a>
+            {% endif %}
+            <span  class="text-sm font-medium border py-2 px-4 items-center inline-flex relative text-yellow-500 border-yellow-500 z-10  ">
+            Page {{page_obj.number}} of {{page_obj.paginator.num_pages}}
+            </span>
+            {% if page_obj.has_next %}
+
+            <a class="text-sm font-medium border py-2 px-4 items-center inline-flex relative text-yellow-500 border-yellow-500 z-10  " href="?page={{page_obj.next_page_number}}">Next</a>
+            <a class="text-sm font-medium border py-2 px-4 items-center inline-flex relative text-yellow-500 border-yellow-500 z-10  " href="?page={{page_obj.paginator.num_pages}}">Last</a>
+
+            {% endif %}
+        </span>
 
     </div>
+    
+    <!--Pagination codes ends here-->
 
 
         

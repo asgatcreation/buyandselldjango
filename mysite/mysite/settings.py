@@ -9,7 +9,7 @@ https://docs.djangoproject.com/en/4.0/topics/settings/
 For the full list of settings and their values, see
 https://docs.djangoproject.com/en/4.0/ref/settings/
 """
-
+import os 
 from pathlib import Path
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
@@ -25,6 +25,11 @@ SECRET_KEY = 'django-insecure-hv!zky57ad1s%w(vjlcfi0d+06l^%%flu28d+_&th30sa#^qi(
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
+#if DEBUG:
+
+    
+     
+
 ALLOWED_HOSTS = []
 
 
@@ -39,6 +44,9 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'myapp',
     'users',
+    'crispy_forms',
+    'paystack',
+    'paystackpay'
 ]
 
 MIDDLEWARE = [
@@ -119,6 +127,13 @@ USE_TZ = True
 
 STATIC_URL = 'static/'
 
+PAYSTACK_SECRET_KEY = os.environ.get('PAYSTACK_SECRET_KEY')
+
+PAYSTACK_PUBLIC_KEY = os.environ.get('PAYSTACK_PUBLIC_KEY')
+
+# PAYSTACK_PUBLIC_KEY='pk_test_d1d9cbfa3f5a37caf3782d53573592640492cd2d',
+# PAYSTACK_SECRET_KEY='sk_test_85bf78c7adc9e892101db83f8696940346a1f1ad'
+
 # Default primary key field type
 # https://docs.djangoproject.com/en/4.0/ref/settings/#default-auto-field
 
@@ -129,3 +144,10 @@ MEDIA_URL = '/media/'
 LOGIN_REDIRECT_URL = 'myapp:products'
 LOGIN_URL='users:login'
 #REGISTER_REDIRECT_URL = 'myapp:products'
+
+
+#secretkey = sk_test_51M97ewSHIB2qHh6gZEFL22rA38rUtGEl0T8VZNWOe3W8rLZUxCbG2dmknlumBb1q1gboiTpO4SIsZISGA2ihOCfI00j1ZoyM4M
+
+
+
+#publishable key = pk_test_51M97ewSHIB2qHh6gEBnPPSaRuw6UBRkDrxmTEoc7aNKKa0wibQb8zYFObYKXww9w1BkuNioJ44FvP9REVnhKE1Ac008LauNYJ9
