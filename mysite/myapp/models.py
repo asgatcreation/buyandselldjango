@@ -31,7 +31,7 @@ class OrderDetail(models.Model):
     product = models.ForeignKey(to='Product', on_delete=models.PROTECT)
     #email = models.EmailField()
     amount = models.IntegerField()
-    paystack_payment_intent = models.CharField(max_length=200)
+    stripe_payment_intent = models.CharField(max_length=200)
     has_paid = models.BooleanField(default = False)
     created_on = models.DateTimeField(auto_now_add=True)
     updted_on = models.DateTimeField(auto_now_add=True)

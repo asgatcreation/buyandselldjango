@@ -23,7 +23,7 @@ from os import name
 #from django.urls import path
 #from django.conf import settings
 #from django.conf.urls.static import static
-from myapp.views import payment_response, product_detail, products
+# from myapp.views import payment_response, product_detail, products
 
 
 
@@ -36,11 +36,11 @@ urlpatterns = [
     
     path('users/',include('users.urls')),
     
-    path('',include('paystackpay.urls')),
+    #path('',include('paystackpay.urls')),
     
-    path('', products, name='products'),
-    path('products/<int:id>/details', product_detail, name='details'),
-    path('callback', payment_response, name='payment_response')
+    # path('', products, name='products'),
+    # path('products/<int:id>/details', product_detail, name='details'),
+    # path('callback', payment_response, name='payment_response')
     
     # path("paystack", include(('paystack.urls', 'paystack'),namespace='paystack'))
 

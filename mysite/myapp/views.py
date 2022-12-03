@@ -1,31 +1,22 @@
-import math
-import random
-from django.views.decorators.http import require_http_methods
-from django.http import HttpResponse
-import requests
-import environ
-# Initialise environment variables
-env = environ.Env()
-environ.Env.read_env()
+# 
 
-from django.shortcuts import render,  redirect
-from django.http import HttpResponse
-from requests import session
 
-from .forms import PaymentForm
-from . import views
-from .models import Product, OrderDetail, CustomerInfo
+
+from django.shortcuts import render,redirect
+from django.http import HttpResponse
+from .models import Product,OrderDetail
 from django.contrib.auth.decorators import login_required
-from django.views.generic import ListView, DetailView, TemplateView
-from django.views.generic.edit import CreateView, UpdateView, DeleteView
-from django.urls import reverse_lazy, reverse
-from django.core.paginator import Paginator 
+from django.views.generic import ListView,DetailView,TemplateView
+from django.views.generic.edit import CreateView,UpdateView,DeleteView
+from django.urls import reverse,reverse_lazy
+from django.core.paginator import Paginator
+
 from django.http.response import HttpResponseNotFound, JsonResponse
 from django.shortcuts import get_object_or_404
 from django.conf import settings
 from django.views.decorators.csrf import csrf_exempt
 import json
-import paystack
+import stripe
 
 
 
@@ -85,8 +76,8 @@ def products(request):
 
 
      
-def product_detail(request,id):
-    product = Product.objects.get(id=id)
+# def product_detail(request,id):
+#     product = Product.objects.get(id=id)
     # if request.method=='POST':
     #     form = PaymentForm(request.POST)
     #     if form.is_valid():
@@ -99,25 +90,25 @@ def product_detail(request,id):
     # else:
     #     form = PaymentForm()
     
-    context={
-        'product':product,
- #       'form':form
-    }
-    return render(request,'myapp/detail.html', context )
+#     context={
+#         'product':product,
+#  #       'form':form
+#     }
+    # return render(request,'myapp/detail.html', context )
     
     #class based view for detail view
     
-# class ProductDetailView(DetailView):
-#     model = Product
-#     template_name='myapp/detail.html'
-#     context_object_name = 'product'
-#     pk_url_kwarg = 'pk'
+class ProductDetailView(DetailView):
+    model = Product
+    template_name='myapp/detail.html'
+    context_object_name = 'product'
+    pk_url_kwarg = 'pk'
     
     
-#     def get_context_data(self, **kwargs):
-#         context = super(ProductDetailView,self).get_context_data(**kwargs)
-#         context['paystack_public_key'] = settings.PAYSTACK_PUBLIC_KEY
-#         return context
+    def get_context_data(self, **kwargs):
+        context = super(ProductDetailView,self).get_context_data(**kwargs)
+        context['stripe_publishable_key'] = settings.STRIPE_PUBLISHABLE_KEY
+        return context
         
         
     
@@ -203,38 +194,71 @@ def my_listings(request):
         'products':products,
     }
     return render(request,'myapp/mylistings.html',context)
-    
 
 @csrf_exempt
 def create_checkout_session(request,id):
     product = get_object_or_404(Product,pk=id)
-    paystack.api_key = settings.PAYSTACK_SECRET_KEY
-    checkout_session = paystack.checkout.Session.create(
+    stripe.api_key = settings.STRIPE_SECRET_KEY
+    checkout_session = stripe.checkout.Session.create(
         customer_email = request.user.email,
+        
         payment_method_types=['card'],
         line_items=[
             {
                 'price_data':{
-                    'currency':'naira',
+                    'currency':'usd',
                     'product_data':{
                         'name':product.name,
                     },
-                    'unit_amount':int(product.price*100),
+                    'unit_amount':int(product.price *100),
                 },
-                'quantity':1
+                'quantity':1,
             }
         ],
-        mode = 'payment',
-        success_url = request.build_absolute_url(reverse('myapp:success'))+"?session_id={CHECKOUT_SESSION_ID}",
-        cancel_url = request.build_absolute_url(reverse('myapp:failed')),
-           
-        
+        mode='payment',
+        success_url = request.build_absolute_uri(reverse('myapp:success'))+"?session_id={CHECKOUT_SESSION_ID}",
+        cancel_url= request.build_absolute_uri(
+            reverse('myapp:failed')),
     )
     
     order = OrderDetail()
     order.customer_username = request.user.username
     order.product = product
-    order.paystack_payment_intent = checkout_session['payment_intent']
+    order.stripe_payment_intent = checkout_session['payment_intent']
+    order.amount = int(product.price*100)
+    order.save()
+    return JsonResponse({'sessionId':checkout_session.id})    
+
+# @csrf_exempt
+# def create_checkout_session(request,id):
+#     product = get_object_or_404(Product,pk=id)
+#     stripe.api_key = settings.STRIPE_SECRET_KEY
+#     checkout_session = stripe.checkout.Session.create(
+#         customer_email = request.user.email,
+#         payment_method_types=['card'],
+#         line_items=[
+#             {
+#                 'price_data':{
+#                     'currency':'ngn',
+#                     'product_data':{
+#                         'name':product.name,
+#                     },
+#                     'unit_amount':int(product.price*100),
+#                 },
+#                 'quantity':1
+#             }
+#         ],
+#         mode = 'payment',
+#         success_url = request.build_absolute_uri(reverse('myapp:success'))+"?session_id={CHECKOUT_SESSION_ID}",
+#         cancel_url = request.build_absolute_uri(reverse('myapp:failed')),
+           
+        
+#     )
+    
+    order = OrderDetail()
+    order.customer_username = request.user.username
+    order.product = product
+    order.stripe_payment_intent = checkout_session['payment_intent']
     order.amount = int(product.price*100)
     order.save()
     return JsonResponse({'sessionId':checkout_session.id})
@@ -242,62 +266,62 @@ def create_checkout_session(request,id):
 
 
 class PaymentSuccessView(TemplateView):
-    template_name = "myapp/payment_success.html"
+    template_name ='myapp/payment_success.html'
     
     def get(self,request,*args,**kwargs):
         session_id = request.GET.get('session_id')
         if session_id is None:
             return HttpResponseNotFound()
-        paystack.checkout.Session.retrieve(session_id)
-        paystack.api_key = settings.PAYSTACK_SECRET_KEY
-        order = get_object_or_404(OrderDetail,paystack_payment_intent = session.payment_intent)
+        session = stripe.checkout.Session.retrieve(session_id)
+        stripe.api_key = settings.STRIPE_SECRET_KEY
+        order = get_object_or_404(OrderDetail,stripe_payment_intent=session.payment_intent)
         order.has_paid = True
         order.save()
-        return render(request, self.template_name)
+        return render(request,self.template_name)
     
 
 class PaymentFailedView(TemplateView):
     template_name = "myapp/payment_failed.html"
     
     
-def process_payment(name,email,amount,phone):
-     auth_token= env('SECRET_KEY')
-     hed = {'Authorization': 'Bearer ' + auth_token}
-     data = {
-                "tx_ref":''+str(math.floor(1000000 + random.random()*9000000)),
-                "amount":amount,
-                "currency":"KES",
-                "redirect_url":"http://localhost:8000/callback",
-                "payment_options":"card",
-                "meta":{
-                    "consumer_id":23,
-                    "consumer_mac":"92a3-912ba-1192a"
-                },
-                "customer":{
-                    "email":email,
-                    "phonenumber":phone,
-                    "name":name
-                },
-                "customizations":{
-                    "title":"Supa Electronics Store",
-                    "description":"Best store in town",
-                    "logo":"https://getbootstrap.com/docs/4.0/assets/brand/bootstrap-solid.svg"
-                }
-                }
-     url = ' https://api.flutterwave.com/v3/payments'
-     response = requests.post(url, json=data, headers=hed)
-     response=response.json()
-     link=response['data']['link']
-     return link
+# def process_payment(name,email,amount,phone):
+#      auth_token= env('SECRET_KEY')
+#      hed = {'Authorization': 'Bearer ' + auth_token}
+#      data = {
+#                 "tx_ref":''+str(math.floor(1000000 + random.random()*9000000)),
+#                 "amount":amount,
+#                 "currency":"KES",
+#                 "redirect_url":"http://localhost:8000/callback",
+#                 "payment_options":"card",
+#                 "meta":{
+#                     "consumer_id":23,
+#                     "consumer_mac":"92a3-912ba-1192a"
+#                 },
+#                 "customer":{
+#                     "email":email,
+#                     "phonenumber":phone,
+#                     "name":name
+#                 },
+#                 "customizations":{
+#                     "title":"Supa Electronics Store",
+#                     "description":"Best store in town",
+#                     "logo":"https://getbootstrap.com/docs/4.0/assets/brand/bootstrap-solid.svg"
+#                 }
+#                 }
+#      url = ' https://api.flutterwave.com/v3/payments'
+#      response = requests.post(url, json=data, headers=hed)
+#      response=response.json()
+#      link=response['data']['link']
+#      return link
 
 
-@require_http_methods(['GET', 'POST'])
-def payment_response(request):
-    status=request.GET.get('status', None)
-    tx_ref=request.GET.get('tx_ref', None)
-    print(status)
-    print(tx_ref)
-    return HttpResponse('Finished')    
+# @require_http_methods(['GET', 'POST'])
+# def payment_response(request):
+#     status=request.GET.get('status', None)
+#     tx_ref=request.GET.get('tx_ref', None)
+#     print(status)
+#     print(tx_ref)
+#     return HttpResponse('Finished')    
 
 
 # def customer_info(request):
